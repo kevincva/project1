@@ -6,7 +6,7 @@ Parameters:
 
     ProjectTag: 
         Type: String 
-        Default: KCTest 
+        Default: JenkinsAutoServer 
         Description: Project tag default is KCTest 
         
     Mission: 
@@ -37,15 +37,16 @@ Parameters:
 
 Resources:
 
-    KACServer: 
+    JenkinsServer: 
         Type: "AWS::EC2::Instance"
         Properties: 
             ImageId: ami-009be716
             KeyName: !Ref KeyName
             InstanceType: t2.micro
 #            SubnetId: !ImportValue ELBsubnetAZA-DEV
-            Subnetid: subnet-f71e6280
-            SecurityGroupIds: sg-bd8586c3
+            IamInstanceProfile: SampleRoleEC2S3
+            SubnetId: subnet-f71e6280
+            SecurityGroupIds: ["sg-bd8586c3"]
             UserData:
                 Fn::Base64:
                   Fn::Sub:
@@ -58,9 +59,14 @@ Resources:
                             - mkdir /var/log/tomcat8
                             - chmod 777 /var/log/tomcat8
                             - usermod -a -G tomcat ec2-user
-                            - yum install tomcat8-webapps tomcat8-admin-webapps tomcat8-docs-webapp
+                            - yum -y install tomcat8-webapps tomcat8-admin-webapps tomcat8-docs-webapp
                             - CATALINA_HOME=/usr/share/tomcat8
                             - WEBAPPS_HOME=/usr/share/tomcat8/webapps
+                            - cd ~
+                            - aws s3 cp s3://devopstechtalkleidos-r/Devops-Dependencies/jenkins_context.xml .
+                            - mv /usr/share/tomcat8/conf/jenkins_context.xml jenkins_context.xml.orig
+                            - cp ./jenkins_context.xml /usr/share/tomcat8/conf
+                            - service tomcat8 start > ~ec2-user/tomcat_start.log
 #                        - { myLocalVar: "Fn::ImportValue": !Join [ "", [ "KACServer-", !Ref Tier ] ] }
                     - { myLocalVar: !Ref KeyName }                                
             Tags: 
@@ -71,8 +77,8 @@ Resources:
 
 Outputs:
 
-        KACServer: 
-            Description: KACServer 
-            Value: !Ref KACServer 
-            Export: 
-                Name: !Join [ "", [ "KACServer-", !Ref Tier ] ]          
+        JenkinsServer: 
+            Description: JenkinsServer 
+            Value: !Ref JenkinsServer 
+#            Export: 
+#                Name: !Join [ "", [ "JenkinsServer-", !Ref Tier ] ]          
