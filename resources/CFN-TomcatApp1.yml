@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: KevinC Test Server CFN for DevOps TechTalk 
+
+Parameters:
+
+    ProjectTag: 
+        Type: String 
+        Default: KCTest 
+        Description: Project tag default is KCTest 
+        
+    Mission: 
+        Type: String 
+        AllowedValues: ["myDEV","myTEST","myPROD", "myADEV", "myATEST", "APROD"] 
+        Description: Mission 
+        
+    Tier: 
+        Type: String 
+        AllowedValues: ["DEV","INT","TEST","PROD"] 
+        Description: Indicate Tier 
+        
+    Network: 
+        Type: String 
+        AllowedValues: 
+            - myNetwork
+            - yourNetwork
+        Description: Ability to change which network
+
+    KeyName:
+        Type: String
+        Default: kevinchinekypair
+        Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+
+    NameTagValue:
+        Type: String 
+        Description: Tag Value for Name (shows up in EC2 console)
+
+Resources:
+
+    KACServer: 
+        Type: "AWS::EC2::Instance"
+        Properties: 
+            ImageId: ami-009be716
+            KeyName: !Ref KeyName
+            InstanceType: t2.micro
+#            SubnetId: !ImportValue ELBsubnetAZA-DEV
+            Subnetid: subnet-f71e6280
+            SecurityGroupIds: sg-bd8586c3
+            UserData:
+                Fn::Base64:
+                  Fn::Sub:
+                    - |
+                        #cloud-config 
+                        runcmd: 
+                            - touch /tmp/FileMadeDuringFirstLaunch.txt
+                            - chmod u+x /tmp/FileMadeDuringFirstLaunch.txt
+                            - /bin/cp -rf /usr/share/zoneinfo/America/New_York /etc/localtime
+                            - mkdir /var/log/tomcat8
+                            - chmod 777 /var/log/tomcat8
+                            - usermod -a -G tomcat ec2-user
+                            - yum install tomcat8-webapps tomcat8-admin-webapps tomcat8-docs-webapp
+                            - CATALINA_HOME=/usr/share/tomcat8
+                            - WEBAPPS_HOME=/usr/share/tomcat8/webapps
+#                        - { myLocalVar: "Fn::ImportValue": !Join [ "", [ "KACServer-", !Ref Tier ] ] }
+                    - { myLocalVar: !Ref KeyName }                                
+            Tags: 
+                - Key: Name 
+                  Value: !Ref NameTagValue 
+                - Key: Project 
+                  Value: !Ref ProjectTag 
+
+Outputs:
+
+        KACServer: 
+            Description: KACServer 
+            Value: !Ref KACServer 
+            Export: 
+                Name: !Join [ "", [ "KACServer-", !Ref Tier ] ]          
