@@ -64,12 +64,6 @@ Resources:
                             - WEBAPPS_HOME=/usr/share/tomcat8/webapps
                             - cd ~
                             - touch THIS_IS_A_TOMCAT_SERVER.TXT
-#                            - aws s3 cp s3://devopstechtalkleidos-r/Devops-Dependencies/jenkins_context.xml .
-#                            - mv /usr/share/tomcat8/conf/jenkins_context.xml jenkins_context.xml.orig
-#                            - cp ./jenkins_context.xml /usr/share/tomcat8/conf
-#                            - wget –q http://169.254.169.254/latest/meta-data/instance-id
-#                            - INSTANCE_ID=`cat instance-id`
-#                            - aws elb register-instances-with-load-balancer –load-balancer-name ${myELBNameLocal} –instances $INSTANCE_ID
                             - service tomcat8 start > ~ec2-user/tomcat_start.log
 #                        - { myLocalVar: "Fn::ImportValue": !Join [ "", [ "KACServer-", !Ref Tier ] ] }
                     - { myLocalVar: !Ref KeyName }                                
