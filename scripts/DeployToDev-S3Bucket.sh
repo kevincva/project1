@@ -7,5 +7,6 @@ echo "Starting Dev Promotion to S3 Static Website"
 
 echo 'WORKSPACE Variable = ' $WORKSPACE
 aws s3 cp $WORKSPACE/html/index.html s3://devopstechtalkleidos-r/KCApp/index.html
+aws s3 cp $WORKSPACE/html/index.html s3://devopstechtalkleidos/index.html
 
 echo "Completed copying artifact to S3 Bucket"
